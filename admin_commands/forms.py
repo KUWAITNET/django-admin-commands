@@ -1,8 +1,8 @@
 from django import forms
 
-from admin_commands.models import ManagementCommand
+from django.utils.translation import gettext_lazy as _
 
 
 class ExecuteCommandForm(forms.Form):
     # command = forms.ModelChoiceField(ManagementCommand.objects.all())
-    args = forms.CharField(required=False)
+    args = forms.CharField(required=False, label=_('Arguments'), help_text=_('Arguments for command'))

@@ -74,3 +74,8 @@ class CallCommandLog(models.Model):
 
     class Meta:
         default_permissions = []
+
+    def __str__(self):
+        return f'{self.command.name} - {self.started} -> {self.finished}'
+
+

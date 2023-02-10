@@ -33,17 +33,20 @@
         </tr>
     </table>
 
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="margin-top: 5px;">
         <div id="content-main">
             <form method="post" action="{% url 'admin:admin_command_execute_command' command.pk %}"  class="form-horizontal">
                 {% csrf_token %}
                 <div class="form-controls">
                     {{ form }}
                 </div>
+                <div class="submit-row">
                 <a href="#" onclick="window.history.back()"
-                   class="button cancel-link">{% translate "Back" %}</a>
+                   class="">{% translate "Back" %}</a>
 
                 <input type="submit" value="{% translate "Execute" %}" class="btn btn-primary mt-2">
+
+                </div>
 
             </form>
         </div>

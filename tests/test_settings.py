@@ -9,7 +9,8 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(PROJECT_DIR, 'db.sqlite3'),
+
         'TEST': {
             'NAME': 'tst_db.sqlite3',
             'MIGRATE': False
@@ -22,14 +23,15 @@ PASSWORD_HASHERS = [
 ]
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.admin',
+    'django.contrib.sitemaps',
 
-    # 'django.contrib.admin.apps.SimpleAdminConfig',
     'django.contrib.staticfiles',
     'admin_commands',
     "tests",
@@ -55,8 +57,8 @@ TEMPLATES = [
     },
 ]
 STATIC_URL = '/static/'
+SITE_ID = 1
 
-MIGRATION_MODULES = {'contenttypes': None, 'auth': None}
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
@@ -66,3 +68,10 @@ MIDDLEWARE = [
 
 ]
 DEBUG = True
+
+ADMIN_COMMANDS_CONFIG = {
+    'allowed_commands': [
+        'ping_google',
+        'remove_stale_contenttypes',
+    ]
+}

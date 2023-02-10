@@ -17,6 +17,7 @@ class CommandAdminBase(admin.ModelAdmin):
     readonly_fields = ['name', 'app_label', 'help']
     fields = ['name', 'app_label', 'help', 'default_args']
     actions = None
+    list_filter = ['app_label']
     change_form_template = 'admin_commands/execute_command.html'
 
     def has_change_permission(self, request, obj=None):
@@ -77,7 +78,12 @@ class CommandAdminBase(admin.ModelAdmin):
 
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
         extra_context = extra_context or {}
-        extra_context['command'] = self.get_object(request, object_id)
+        command = self.get_object(request, object_id)
+        extra_context['command'] = command
+        if request.method == 'GET':
+            form = ExecuteCommandForm(initial={'args': command.default_args})
+            extra_context['form'] = form
+            
         return super().changeform_view(request, object_id, form_url, extra_context)
 
 
@@ -89,7 +95,12 @@ class CommandAdmin(CommandAdminBase):
 @admin.register(CallCommandLog)
 class CallCommandAdmin(admin.ModelAdmin):
     list_display = ['command', 'args', 'user', 'started', 'finished', 'output', 'error']
+    list_filter = ['command', 'user']
+
     def has_change_permission(self, request, obj=None):
+        if obj:
+            return False
+
         opts = ManagementCommand._meta
         codename = get_permission_codename('change', opts)
         return request.user.has_perm("%s.%s" % (opts.app_label, codename))
