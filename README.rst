@@ -1,19 +1,3 @@
-.. image:: https://img.shields.io/pypi/v/django-slick-reporting.svg
-    :target: https://pypi.org/project/django-slick-reporting
-
-.. image:: https://img.shields.io/pypi/pyversions/django-slick-reporting.svg
-    :target: https://pypi.org/project/django-slick-reporting
-
-.. image:: https://img.shields.io/readthedocs/django-slick-reporting
-    :target: https://django-slick-reporting.readthedocs.io/
-
-.. image:: https://api.travis-ci.com/ra-systems/django-slick-reporting.svg?branch=master
-    :target: https://app.travis-ci.com/github/ra-systems/django-slick-reporting
-
-.. image:: https://img.shields.io/codecov/c/github/ra-systems/django-slick-reporting
-    :target: https://codecov.io/gh/ra-systems/django-slick-reporting
-
-
 
 Django-admin-commands
 =====================
