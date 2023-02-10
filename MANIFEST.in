@@ -1,4 +1,4 @@
-include LICENSE.md
+include LICENSE
 include README.md
 recursive-include admin_commands/static *
 recursive-include admin_commands/templates *
