@@ -1,0 +1,5 @@
+include LICENSE.md
+include README.md
+recursive-include admin_commands/static *
+recursive-include admin_commands/templates *
+recursive-exclude tests/ *

@@ -1,0 +1,51 @@
+{% extends "admin/change_form.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    {{ form.media }}
+    {#    <script type="text/javascript" src="{% static 'admin/js/cancel.js' %}"></script>#}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} asign-to-user {% endblock %}
+
+{% block content %}
+
+    <h2>{% translate "Execute Command"|capfirst %}</h2>
+
+    <table class="table">
+        <tr>
+            <th>{% translate "Command" %}</th>
+            <td>{{ command.name }}</td>
+        </tr>
+        <tr>
+            <th>{% translate "Description" %}</th>
+            <td>{{ command.help }}</td>
+        </tr>
+        <tr>
+            <th>{% translate "Default Arguments" %}</th>
+            <td>{{ command.default_args }}</td>
+        </tr>
+        <tr>
+            <th>{% trans 'Help' %}</th>
+            <td>{{ command.print_help|linebreaks }}</td>
+        </tr>
+    </table>
+
+    <div class="col-sm-12">
+        <div id="content-main">
+            <form method="post" action="{% url 'admin:admin_command_execute_command' command.pk %}"  class="form-horizontal">
+                {% csrf_token %}
+                <div class="form-controls">
+                    {{ form }}
+                </div>
+                <a href="#" onclick="window.history.back()"
+                   class="button cancel-link">{% translate "Back" %}</a>
+
+                <input type="submit" value="{% translate "Execute" %}" class="btn btn-primary mt-2">
+
+            </form>
+        </div>
+    </div>
+{% endblock %}
