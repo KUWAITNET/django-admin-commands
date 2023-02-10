@@ -23,18 +23,8 @@ def sync_commands(save_to_db=True):
             command_class = load_command_class(app_label, command)
             c, created = ManagementCommand.objects.get_or_create(name=command, app_label=app_label)
             c.help = command_class.help
-            c.deleted = False
+            c.active = True
             c.save()
             if not created:
                 commands_in_db.remove(command)
-    ManagementCommand.objects.filter(name__in=commands_in_db).update(deleted=True)
-
-
-
-
-
-
-
-
-
-
+    ManagementCommand.objects.filter(name__in=commands_in_db).update(active=False)

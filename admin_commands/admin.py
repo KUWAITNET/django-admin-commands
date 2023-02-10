@@ -8,7 +8,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from admin_commands.forms import ExecuteCommandForm
-from admin_commands.models import ManagementCommand, CallCommandLog
+from admin_commands.models import CallCommandLog, ActiveManagementCommand
 
 
 class CommandAdminBase(admin.ModelAdmin):
@@ -85,8 +85,11 @@ class CommandAdminBase(admin.ModelAdmin):
         )
         return render(request, 'admin_commands/execute_command.html', context)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request)
 
-@admin.register(ManagementCommand)
+
+@admin.register(ActiveManagementCommand)
 class ManagementCommandAdmin(CommandAdminBase):
     pass
 

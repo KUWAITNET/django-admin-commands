@@ -15,7 +15,7 @@ class ManagementCommand(models.Model):
     app_label = models.CharField(max_length=255)
     help = models.TextField(default='')
     default_args = models.TextField(default='')
-    deleted = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _('Management Command')
@@ -43,6 +43,9 @@ class ManagementCommand(models.Model):
         return out.getvalue()
 
     def execute(self, user, sys_args):
+        if not self.active:
+            return False
+
         log = CallCommandLog.objects.create(
             user=user,
             command=self,
@@ -62,7 +65,21 @@ class ManagementCommand(models.Model):
         log.error = err.getvalue()
         log.finished = now()
         log.save()
-        return
+        return True
+
+
+class ActiveManagementCommandManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(active=True)
+
+
+class ActiveManagementCommand(ManagementCommand):
+    objects = ActiveManagementCommandManager()
+
+    class Meta:
+        proxy = True
+        verbose_name = _('Active Management Command')
+        verbose_name_plural = _('Active Management Commands')
 
 
 class CallCommandLog(models.Model):
@@ -82,5 +99,3 @@ class CallCommandLog(models.Model):
 
     def __str__(self):
         return f'{self.command.name} - {self.started} -> {self.finished}'
-
-

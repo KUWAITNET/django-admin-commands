@@ -26,24 +26,24 @@ class Tests(TestCase):
         self.assertEqual(qs.count(), 1)
         self.assertEqual(qs[0].name, 'createsuperuser')
         self.assertEqual(qs[0].app_label, 'django.contrib.auth')
-        self.assertFalse(qs[0].deleted)
+        self.assertTrue(qs[0].active)
 
         @override_settings(ADMIN_COMMANDS_CONFIG={'allowed_commands': []})
         def test_remove_command():
             from .utils import sync_commands
             sync_commands()
             command = ManagementCommand.objects.get(name='createsuperuser')
-            self.assertTrue(command.deleted)
+            self.assertFalse(command.active)
 
         test_remove_command()
 
     def check_pages(self, user, status_code):
         command_1 = ManagementCommand.objects.first()
         self.client.login(username=user, password='password')
-        response = self.client.get(reverse('admin:admin_commands_managementcommand_changelist'))
+        response = self.client.get(reverse('admin:admin_commands_activemanagementcommand_changelist'))
         self.assertEqual(response.status_code, status_code)
 
-        response = self.client.get(reverse('admin:admin_commands_managementcommand_change', args=(command_1.pk,)))
+        response = self.client.get(reverse('admin:admin_commands_activemanagementcommand_change', args=(command_1.pk,)))
         self.assertEqual(response.status_code, status_code)
         response = self.client.get(reverse('admin:admin_commands_callcommandlog_changelist'))
         self.assertEqual(response.status_code, status_code)
@@ -64,7 +64,7 @@ class Tests(TestCase):
         self.check_pages('user_wo_permission', 403)
 
         self.client.login(username='user_w_permission', password='password')
-        response = self.client.get(reverse('admin:admin_commands_managementcommand_change', args=(0,)))
+        response = self.client.get(reverse('admin:admin_commands_activemanagementcommand_change', args=(0,)))
         self.assertEqual(response.status_code, 404)
 
         response = self.client.get(reverse('admin:admin_commands_callcommandlog_change', args=(log.pk,)))
