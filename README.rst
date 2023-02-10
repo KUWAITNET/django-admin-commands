@@ -16,8 +16,16 @@ Features
 
 Installation
 ------------
-* Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
-  *There was a package with the same name on pypi , hence the 2 suffix*
+
+* Install directly from repo
+
+.. code-block:: console
+
+        pip install git+https://github.com/RamezIssac/django-admin-commands#egg=django-admin-commands
+
+
+(not yet) Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
+*There is a package with the same name on pypi , hence the 2 suffix*
 
 .. code-block:: console
 
@@ -31,10 +39,11 @@ Installation
 
 Usage
 -----
-* Adds the commands you need to allow to the admin. Example:
+* Adds the commands you need to allow to the admin to your settings. Example:
 
 .. code-block:: python
 
+        # settings.py
         ADMIN_COMMANDS_CONFIG = {
                 'allowed_commands': ['ping_google', 'update_index']
                 # OR
@@ -42,13 +51,14 @@ Usage
                 # this will load all the commands available on manage.py
         }
 
-* Navigate to the admin site `/admin_commands/managementcommands/` to find the commands you have allowed added
+* Navigate to the admin site and you will see a new section called `Management Commands` with commands to execute and see their logs
 
 Permissions
 -----------
 App comes with 2 permissions
+
 1. `Can execute management commands` which is required to access & execute commands allowed.
-2. `View other users log` which is allow the user to see the logs of other users ran commands.
+2. `View other users log` which is allow the user to see the logs of other users ran commands. If Not given, logs will be filtered to own records only.
 
 
 
