@@ -20,7 +20,7 @@ class ManagementCommand(models.Model):
     class Meta:
         verbose_name = _('Management Command')
         verbose_name_plural = _('Management Commands')
-        default_permissions = ['view']
+        default_permissions = []
         permissions = [
             ('execute_command', _('Can execute command')),
         ]
@@ -50,12 +50,14 @@ class ManagementCommand(models.Model):
         )
         out = StringIO()
         err = StringIO()
-        # breakpoint()
         args = [self.name]
         if sys_args:
             args.append(sys_args)
-        call_command(*args, stdout=out)
-        # breakpoint()
+        try:
+            call_command(*args, stdout=out, stderr=err)
+        except Exception as e:
+            err.write(str(e))
+
         log.output = out.getvalue()
         log.error = err.getvalue()
         log.finished = now()
@@ -74,6 +76,9 @@ class CallCommandLog(models.Model):
 
     class Meta:
         default_permissions = []
+        permissions = [
+            ('view_other_users_log', _('View other users log')),
+        ]
 
     def __str__(self):
         return f'{self.command.name} - {self.started} -> {self.finished}'

@@ -2,6 +2,7 @@ from django.apps import AppConfig
 from django.db import OperationalError
 from django.utils.translation import gettext_lazy as _
 
+
 class AdminCommandsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'admin_commands'
@@ -12,7 +13,5 @@ class AdminCommandsConfig(AppConfig):
         from .utils import sync_commands
         try:
             sync_commands()
-        except OperationalError:
+        except OperationalError:  # pragma: no cover Before first migrations
             pass
-
-
