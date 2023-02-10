@@ -85,6 +85,9 @@ class CommandAdminBase(admin.ModelAdmin):
         )
         return render(request, 'admin_commands/execute_command.html', context)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(deleted=True)
+
 
 @admin.register(ManagementCommand)
 class ManagementCommandAdmin(CommandAdminBase):

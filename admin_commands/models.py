@@ -43,6 +43,9 @@ class ManagementCommand(models.Model):
         return out.getvalue()
 
     def execute(self, user, sys_args):
+        if self.deleted:
+            return False
+
         log = CallCommandLog.objects.create(
             user=user,
             command=self,
@@ -62,7 +65,7 @@ class ManagementCommand(models.Model):
         log.error = err.getvalue()
         log.finished = now()
         log.save()
-        return
+        return True
 
 
 class CallCommandLog(models.Model):
