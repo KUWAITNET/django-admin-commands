@@ -65,3 +65,4 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 
 ]
+DEBUG = True
