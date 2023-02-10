@@ -2,15 +2,14 @@
 Django-admin-commands
 =====================
 
-Sometimes one would like to allow the admin to have access to some of the management commands.
-djagno-admin-commands2 is the answer. A Tool to execute management commands from admin with ease and control.
-
+Because sometimes you want to give teh admin access to some commands. This app allows you to specify the commands you want to allow the admin to execute. It also logs the commands executed and the output of the command.
 
 Features
 --------
 
 * Specify the commands you need to allow for admin to execute. (Or explicitly choose all)
-* Get the logs out in admin
+* Get the logs, stdout, stderr in admin.
+* Easy permissions
 * Easily customizable to use django-rq or other queueing technique
 
 
@@ -31,7 +30,7 @@ Installation
 
         pip install django-admin-commands2
 
-* Add admin_commands to you INSTALLED_APPS
+* Add `admin_commands` to your `INSTALLED_APPS`
 
 * python manage.py migrate
 
@@ -86,6 +85,11 @@ You can override the admin class for ManagementCommandsAdmin to customize the ad
             def execute_command_view(self, request, object_id):
                 # This is the view that is called when the user clicks on the execute button, you can override this to
                 # customize the execution of the command, check source for information on how to do this.
+                pass
+
+            def get_queryset(self, request):
+                # This is the queryset that is used to filter the commands that are shown in the admin.
+                # You can override this to customize the queryset for the user
                 pass
 
         admin.site.unregister(ManagementCommands)
