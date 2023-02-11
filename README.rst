@@ -49,6 +49,8 @@ Usage
                     ]
                 # You can also use the following to allow all commands
                 # 'allowed_commands': 'all'
+
+                'use_django_rq': True, # If you want to use django-rq to execute the commands, default is False
         }
 
 * Navigate to the admin site and you will see a new section called `Management Commands` with commands to execute and see their logs
@@ -68,16 +70,18 @@ You can override the admin class for ManagementCommandsAdmin to customize the ad
 
 .. code-block:: python
 
+        # admin.py
         from admin_commands.admin import CommandAdminBase, ManagementCommandAdmin
         from admin_commands.models import ManagementCommands
 
         class CustomManagementCommandsAdmin(ManagementCommandAdmin):
 
             def execute_command_and_return_response(self, request, command, args):
-                # Easy Entry point to customize execution, maybe wrap it in a django rq job or something :
+                # Easy Entry point to customize execution,
                 import django_rq
                 django_rq.enqueue(command.execute, request.user, args)
-                # Current implementation is:
+
+                # OR without django_rq
                 command.execute(request.user, args)
 
                 self.message_user(request, _('Command executed'))
@@ -86,12 +90,12 @@ You can override the admin class for ManagementCommandsAdmin to customize the ad
             def execute_command_view(self, request, object_id):
                 # This is the view that is called when the user clicks on the execute button, you can override this to
                 # customize the execution of the command, check source for information on how to do this.
-                pass
+                return super().execute_command_view(request, object_id)
 
             def get_queryset(self, request):
                 # This is the queryset that is used to filter the commands that are shown in the admin.
                 # You can override this to customize the queryset for the user
-                pass
+                return super().get_queryset(request)
 
         admin.site.unregister(ManagementCommands)
         admin.site.register(ManagementCommands, CustomManagementCommandsAdmin)

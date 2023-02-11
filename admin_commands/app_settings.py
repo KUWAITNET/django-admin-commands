@@ -3,9 +3,7 @@ from django.utils.functional import lazy
 
 ADMIN_COMMANDS_CONFIG_DEFAULTS = {
     'allowed_commands': [],
-    'permission_function': '',
-    # 'exclude_apps': [],
-    # 'exclude_commands': [],
+    'use_django_rq': False,
 }
 
 def get_admin_commands_settings():

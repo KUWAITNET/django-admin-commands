@@ -7,8 +7,9 @@ from django.utils.encoding import force_text
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from admin_commands.forms import ExecuteCommandForm
-from admin_commands.models import ManagementCommand, CallCommandLog
+from .app_settings import ADMIN_COMMANDS_CONFIG
+from .forms import ExecuteCommandForm
+from .models import ManagementCommand, CallCommandLog
 
 
 class CommandAdminBase(admin.ModelAdmin):
@@ -42,7 +43,7 @@ class CommandAdminBase(admin.ModelAdmin):
 
         extra_context['command'] = command
         if request.method == 'GET':
-            form = ExecuteCommandForm(initial={'args': command.default_args})
+            form = ExecuteCommandForm()
             extra_context['form'] = form
         return super().changeform_view(request, object_id, form_url, extra_context)
 
@@ -53,6 +54,11 @@ class CommandAdminBase(admin.ModelAdmin):
     execute_command_link.short_description = _('Execute command')
 
     def execute_command_and_return_response(self, request, command, args):
+        if ADMIN_COMMANDS_CONFIG['use_django_rq']:
+            from django_rq import get_queue
+            queue = get_queue('default')
+            queue.enqueue(command.execute, request.user, args)
+
         command.execute(request.user, args)
         self.message_user(request, _('Command executed'))
         return self.response_post_save_add(request, command)
