@@ -43,7 +43,7 @@ class CommandAdminBase(admin.ModelAdmin):
 
         extra_context['command'] = command
         if request.method == 'GET':
-            form = ExecuteCommandForm()
+            form = ExecuteCommandForm(initial={'command': command.pk})
             extra_context['form'] = form
         return super().changeform_view(request, object_id, form_url, extra_context)
 
@@ -54,6 +54,7 @@ class CommandAdminBase(admin.ModelAdmin):
     execute_command_link.short_description = _('Execute command')
 
     def execute_command_and_return_response(self, request, command, args):
+
         if ADMIN_COMMANDS_CONFIG['use_django_rq']:
             from django_rq import get_queue
             queue = get_queue('default')
@@ -74,7 +75,7 @@ class CommandAdminBase(admin.ModelAdmin):
                 return self.execute_command_and_return_response(request, command, form.cleaned_data['args'])
 
         else:
-            form = ExecuteCommandForm(initial={'args': command.default_args})
+            form = ExecuteCommandForm(initial={'command': command.pk})
 
         opts = self.model._meta
         context = dict(
@@ -92,7 +93,7 @@ class CommandAdminBase(admin.ModelAdmin):
         return render(request, 'admin_commands/execute_command.html', context)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(deleted=True)
+        return super().get_queryset(request).filter(deleted=False)
 
 
 @admin.register(ManagementCommand)
