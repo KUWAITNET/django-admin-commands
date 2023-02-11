@@ -1,4 +1,3 @@
-
 Django-admin-commands
 =====================
 
@@ -44,10 +43,12 @@ Usage
 
         # settings.py
         ADMIN_COMMANDS_CONFIG = {
-                'allowed_commands': ['ping_google', 'update_index']
-                # OR
+                'allowed_commands': [
+                    'ping_google', # command name
+                    ('update_index', '--no-input') # you can also pass arguments to the command,
+                    ]
+                # You can also use the following to allow all commands
                 # 'allowed_commands': 'all'
-                # this will load all the commands available on manage.py
         }
 
 * Navigate to the admin site and you will see a new section called `Management Commands` with commands to execute and see their logs
