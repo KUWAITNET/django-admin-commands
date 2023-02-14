@@ -4,7 +4,7 @@ from django.http import HttpResponseNotFound
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.encoding import force_text
-from django.utils.html import format_html
+from django.utils.html import format_html, linebreaks
 from django.utils.translation import gettext_lazy as _
 
 from .app_settings import ADMIN_COMMANDS_CONFIG
@@ -103,8 +103,18 @@ class ManagementCommandAdmin(CommandAdminBase):
 
 @admin.register(CallCommandLog)
 class CallCommandAdmin(admin.ModelAdmin):
-    list_display = ['command', 'args', 'user', 'started', 'finished', 'output', 'error']
+    list_display = ['command', 'args', 'user', 'started', 'finished', 'get_output', 'get_error']
     list_filter = ['command', 'user']
+
+    def get_output(self, obj):
+        return linebreaks(obj.output)
+
+    get_output.short_description = _('Output')
+
+    def get_error(self, obj):
+        return linebreaks(obj.error)
+
+    get_error.short_description = _('Error')
 
     def has_view_permission(self, request, obj=None):
         return request.user.has_perm("admin_commands.execute_command")
