@@ -19,10 +19,11 @@ Installation
 
 .. code-block:: console
 
-        pip install git+https://github.com/RamezIssac/django-admin-commands#egg=django-admin-commands
+        pip install git+https://github.com/KUWAITNET/django-admin-commands#egg=django-admin-commands2
 
+* Install from pypi
 
-(not yet) Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
+Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
 *There is a package with the same name on pypi , hence the 2 suffix*
 
 .. code-block:: console
