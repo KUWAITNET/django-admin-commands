@@ -2,17 +2,20 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
+from django.template.defaultfilters import linebreaksbr
 from django.urls import reverse
 from django.utils.encoding import force_text
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from admin_commands.forms import ExecuteCommandForm
-from admin_commands.models import ManagementCommand, CallCommandLog
+from .app_settings import ADMIN_COMMANDS_CONFIG
+from .forms import ExecuteCommandForm
+from .models import ManagementCommand, CallCommandLog
 
 
 class CommandAdminBase(admin.ModelAdmin):
-    list_display = ['name', 'app_label', 'help', 'default_args', 'execute_command_link']
+    list_display = ['name', 'app_label', 'get_help', 'default_args', 'execute_command_link']
     readonly_fields = ['name', 'app_label', 'help']
     fields = ['name', 'app_label', 'help', 'default_args']
     actions = None
@@ -42,9 +45,16 @@ class CommandAdminBase(admin.ModelAdmin):
 
         extra_context['command'] = command
         if request.method == 'GET':
-            form = ExecuteCommandForm(initial={'args': command.default_args})
+            form = ExecuteCommandForm(initial={'command': command.pk})
             extra_context['form'] = form
         return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def get_help(self, obj):
+        if not obj.help:
+            return ''
+        return format_html(linebreaksbr(obj.help))
+
+    get_help.short_description = _('Help')
 
     def execute_command_link(self, obj):
         return format_html('<a href="{}">{}</a>', reverse("admin:admin_commands_execute_command", args=[obj.pk]),
@@ -53,6 +63,12 @@ class CommandAdminBase(admin.ModelAdmin):
     execute_command_link.short_description = _('Execute command')
 
     def execute_command_and_return_response(self, request, command, args):
+
+        if ADMIN_COMMANDS_CONFIG['use_django_rq']:
+            from django_rq import get_queue
+            queue = get_queue('default')
+            queue.enqueue(command.execute, request.user, args)
+
         command.execute(request.user, args)
         self.message_user(request, _('Command executed'))
         return self.response_post_save_add(request, command)
@@ -68,7 +84,7 @@ class CommandAdminBase(admin.ModelAdmin):
                 return self.execute_command_and_return_response(request, command, form.cleaned_data['args'])
 
         else:
-            form = ExecuteCommandForm(initial={'args': command.default_args})
+            form = ExecuteCommandForm(initial={'command': command.pk})
 
         opts = self.model._meta
         context = dict(
@@ -85,6 +101,9 @@ class CommandAdminBase(admin.ModelAdmin):
         )
         return render(request, 'admin_commands/execute_command.html', context)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(deleted=False)
+
 
 @admin.register(ManagementCommand)
 class ManagementCommandAdmin(CommandAdminBase):
@@ -93,8 +112,22 @@ class ManagementCommandAdmin(CommandAdminBase):
 
 @admin.register(CallCommandLog)
 class CallCommandAdmin(admin.ModelAdmin):
-    list_display = ['command', 'args', 'user', 'started', 'finished', 'output', 'error']
+    list_display = ['command', 'args', 'user', 'started', 'finished', 'get_output', 'get_error']
     list_filter = ['command', 'user']
+
+    def get_output(self, obj):
+        if not obj.output:
+            return ''
+        return format_html(linebreaksbr(obj.output))
+
+    get_output.short_description = _('Output')
+
+    def get_error(self, obj):
+        if not obj.error:
+            return ''
+        return format_html(mark_safe(linebreaksbr(obj.error)))
+
+    get_error.short_description = _('Error')
 
     def has_view_permission(self, request, obj=None):
         return request.user.has_perm("admin_commands.execute_command")

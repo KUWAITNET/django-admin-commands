@@ -1,29 +1,35 @@
-
 Django-admin-commands
 =====================
 
-Sometimes one would like to allow the admin to have access to some of the management commands.
-djagno-admin-commands2 is the answer. A Tool to execute management commands from admin with ease and control.
-
+Because sometimes you want to give teh admin access to some commands. This app allows you to specify the commands you want to allow the admin to execute. It also logs the commands executed and the output of the command.
 
 Features
 --------
 
 * Specify the commands you need to allow for admin to execute. (Or explicitly choose all)
-* Get the logs out in admin
+* Get the logs, stdout, stderr in admin.
+* Easy permissions
 * Easily customizable to use django-rq or other queueing technique
 
 
 Installation
 ------------
-* Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
-  *There was a package with the same name on pypi , hence the 2 suffix*
+
+* Install directly from repo
+
+.. code-block:: console
+
+        pip install git+https://github.com/RamezIssac/django-admin-commands#egg=django-admin-commands
+
+
+(not yet) Use the package manager `pip <https://pip.pypa.io/en/stable/>`_ to install django-admin-commands2.
+*There is a package with the same name on pypi , hence the 2 suffix*
 
 .. code-block:: console
 
         pip install django-admin-commands2
 
-* Add admin_commands to you INSTALLED_APPS
+* Add `admin_commands` to your `INSTALLED_APPS`
 
 * python manage.py migrate
 
@@ -31,24 +37,30 @@ Installation
 
 Usage
 -----
-* Adds the commands you need to allow to the admin. Example:
+* Adds the commands you need to allow to the admin to your settings. Example:
 
 .. code-block:: python
 
+        # settings.py
         ADMIN_COMMANDS_CONFIG = {
-                'allowed_commands': ['ping_google', 'update_index']
-                # OR
+                'allowed_commands': [
+                    'ping_google', # command name
+                    ('update_index', '--no-input') # you can also pass arguments to the command,
+                    ]
+                # You can also use the following to allow all commands
                 # 'allowed_commands': 'all'
-                # this will load all the commands available on manage.py
+
+                'use_django_rq': True, # If you want to use django-rq to execute the commands, default is False
         }
 
-* Navigate to the admin site `/admin_commands/managementcommands/` to find the commands you have allowed added
+* Navigate to the admin site and you will see a new section called `Management Commands` with commands to execute and see their logs
 
 Permissions
 -----------
 App comes with 2 permissions
+
 1. `Can execute management commands` which is required to access & execute commands allowed.
-2. `View other users log` which is allow the user to see the logs of other users ran commands.
+2. `View other users log` which is allow the user to see the logs of other users ran commands. If Not given, logs will be filtered to own records only.
 
 
 
@@ -58,16 +70,18 @@ You can override the admin class for ManagementCommandsAdmin to customize the ad
 
 .. code-block:: python
 
+        # admin.py
         from admin_commands.admin import CommandAdminBase, ManagementCommandAdmin
         from admin_commands.models import ManagementCommands
 
         class CustomManagementCommandsAdmin(ManagementCommandAdmin):
 
             def execute_command_and_return_response(self, request, command, args):
-                # Easy Entry point to customize execution, maybe wrap it in a django rq job or something :
+                # Easy Entry point to customize execution,
                 import django_rq
                 django_rq.enqueue(command.execute, request.user, args)
-                # Current implementation is:
+
+                # OR without django_rq
                 command.execute(request.user, args)
 
                 self.message_user(request, _('Command executed'))
@@ -76,7 +90,12 @@ You can override the admin class for ManagementCommandsAdmin to customize the ad
             def execute_command_view(self, request, object_id):
                 # This is the view that is called when the user clicks on the execute button, you can override this to
                 # customize the execution of the command, check source for information on how to do this.
-                pass
+                return super().execute_command_view(request, object_id)
+
+            def get_queryset(self, request):
+                # This is the queryset that is used to filter the commands that are shown in the admin.
+                # You can override this to customize the queryset for the user
+                return super().get_queryset(request)
 
         admin.site.unregister(ManagementCommands)
         admin.site.register(ManagementCommands, CustomManagementCommandsAdmin)

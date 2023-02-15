@@ -1,5 +1,5 @@
 from django.apps import AppConfig
-from django.db import OperationalError
+from django.db import OperationalError, ProgrammingError
 from django.utils.translation import gettext_lazy as _
 
 
@@ -13,5 +13,5 @@ class AdminCommandsConfig(AppConfig):
         from .utils import sync_commands
         try:
             sync_commands()
-        except OperationalError:  # pragma: no cover Before first migrations
+        except (OperationalError, ProgrammingError):  # pragma: no cover Before first migrations
             pass

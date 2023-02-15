@@ -73,5 +73,8 @@ ADMIN_COMMANDS_CONFIG = {
     'allowed_commands': [
         'ping_google',
         'remove_stale_contenttypes',
+
+        'test_command',
     ]
+
 }

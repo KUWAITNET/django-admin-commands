@@ -55,7 +55,7 @@ class Tests(TestCase):
 
     def test_permissions(self):
         sync_commands()
-        command_1 = ManagementCommand.objects.first()
+        command_1 = ManagementCommand.objects.filter(deleted=False).first()
         command_1.execute(None, '')
         log = command_1.callcommandlog_set.first()
 
@@ -77,7 +77,7 @@ class Tests(TestCase):
         # ping_google command would raise an error because the sitemap is mandatory
         # we test that the error is logged
         sync_commands()
-        command_1 = ManagementCommand.objects.first()
+        command_1 = ManagementCommand.objects.filter(deleted=False).first()
         self.client.login(username='superuser', password='password')
         response = self.client.post(reverse('admin:admin_commands_execute_command', args=(command_1.pk,)))
         self.assertEqual(response.status_code, 302)
