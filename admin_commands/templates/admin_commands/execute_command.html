@@ -21,7 +21,7 @@
         </tr>
         <tr>
             <th>{% translate "Description" %}</th>
-            <td>{{ command.help }}</td>
+            <td>{{ command.help|linebreaksbr }}</td>
         </tr>
         <tr>
             <th>{% translate "Default Arguments" %}</th>
@@ -29,7 +29,7 @@
         </tr>
         <tr>
             <th>{% trans 'Help' %}</th>
-            <td>{{ command.print_help|linebreaks }}</td>
+            <td>{{ command.print_help|linebreaksbr }}</td>
         </tr>
     </table>
 

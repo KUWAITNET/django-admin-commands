@@ -2,9 +2,11 @@ from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
+from django.template.defaultfilters import linebreaksbr
 from django.urls import reverse
 from django.utils.encoding import force_text
-from django.utils.html import format_html, linebreaks
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .app_settings import ADMIN_COMMANDS_CONFIG
@@ -13,7 +15,7 @@ from .models import ManagementCommand, CallCommandLog
 
 
 class CommandAdminBase(admin.ModelAdmin):
-    list_display = ['name', 'app_label', 'help', 'default_args', 'execute_command_link']
+    list_display = ['name', 'app_label', 'get_help', 'default_args', 'execute_command_link']
     readonly_fields = ['name', 'app_label', 'help']
     fields = ['name', 'app_label', 'help', 'default_args']
     actions = None
@@ -46,6 +48,13 @@ class CommandAdminBase(admin.ModelAdmin):
             form = ExecuteCommandForm(initial={'command': command.pk})
             extra_context['form'] = form
         return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def get_help(self, obj):
+        if not obj.help:
+            return ''
+        return format_html(linebreaksbr(obj.help))
+
+    get_help.short_description = _('Help')
 
     def execute_command_link(self, obj):
         return format_html('<a href="{}">{}</a>', reverse("admin:admin_commands_execute_command", args=[obj.pk]),
@@ -107,12 +116,16 @@ class CallCommandAdmin(admin.ModelAdmin):
     list_filter = ['command', 'user']
 
     def get_output(self, obj):
-        return linebreaks(obj.output)
+        if not obj.output:
+            return ''
+        return format_html(linebreaksbr(obj.output))
 
     get_output.short_description = _('Output')
 
     def get_error(self, obj):
-        return linebreaks(obj.error)
+        if not obj.error:
+            return ''
+        return format_html(mark_safe(linebreaksbr(obj.error)))
 
     get_error.short_description = _('Error')
 
