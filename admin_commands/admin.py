@@ -67,8 +67,9 @@ class CommandAdminBase(admin.ModelAdmin):
             from django_rq import get_queue
             queue = get_queue('default')
             queue.enqueue(command.execute, request.user, args)
+        else:
+            command.execute(request.user, args)
 
-        command.execute(request.user, args)
         self.message_user(request, _('Command executed'))
         return self.response_post_save_add(request, command)
 
